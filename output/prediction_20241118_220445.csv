@@ -1,2 +1,0 @@
-Total Length of Fwd Packet,Fwd Packet Length Max,Fwd Packet Length Mean,Bwd Packet Length Max,Bwd Packet Length Min,Bwd Packet Length Mean,Bwd Packet Length Std,Packet Length Max,Packet Length Min,Packet Length Mean,Packet Length Std,Packet Length Variance,Bwd IAT Total,URG Flag Count,Average Packet Size,Fwd Segment Size Avg,Bwd Segment Size Avg,Subflow Fwd Bytes,Label,timestamp
-1255,480.0,209.16666666666663,572.0,65.0,192.25,212.99985328633448,572,65,199.5,201.6091515779976,40646.25,236267.08984375,0,199.5,209.16666666666663,192.25,1255,BENIGN,2024-11-18 22:04:45.518961

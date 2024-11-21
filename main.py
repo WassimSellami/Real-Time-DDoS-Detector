@@ -11,6 +11,7 @@ import pandas as pd
 import os
 import pickle
 import logging
+from constants import Constants
 from dashboard import app, update_dashboard_data
 from threading import Thread
 import shutil
@@ -51,7 +52,7 @@ def main():
     try:
         while True:
             sniffer = create_sniffer(
-                input_interface="Ethernet",
+                input_interface=Constants.NETWORK_INTERFACE,
                 to_csv=True,
                 output_file=classifier_input_file,
                 verbose=True,

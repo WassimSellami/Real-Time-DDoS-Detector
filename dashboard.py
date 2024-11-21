@@ -6,6 +6,7 @@ import os
 from visualizer import TrafficVisualizer
 import pandas as pd
 from datetime import datetime
+from constants import Constants
 
 app = dash.Dash(__name__)
 visualizer = TrafficVisualizer()
@@ -29,10 +30,17 @@ def update_dashboard_data(df):
 
 app.layout = html.Div(
     [
-        html.Div([dcc.Graph(id="traffic-graph", style={"height": "800px"})]),
+        html.Div(
+            [
+                dcc.Graph(
+                    id="traffic-graph", style={"height": f"{Constants.GRAPH_HEIGHT}px"}
+                )
+            ]
+        ),
         dcc.Interval(
             id="interval-component",
-            interval=5 * 1000,  # Update every 5 seconds
+            interval=Constants.UPDATE_INTERVAL
+            * 1000,  # Convert seconds to milliseconds
             n_intervals=0,
         ),
     ]
