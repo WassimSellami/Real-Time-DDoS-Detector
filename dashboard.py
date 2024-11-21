@@ -1,15 +1,13 @@
 import dash
-from dash import html, dcc
+from dash import html, dcc, dash_table
 from dash.dependencies import Input, Output
 import glob
 import os
-from visualizer import TrafficVisualizer
 import pandas as pd
 from datetime import datetime
 from constants import Constants
 
 app = dash.Dash(__name__)
-visualizer = TrafficVisualizer()
 
 # Create a global variable to store the latest data
 latest_data = None
@@ -30,10 +28,38 @@ def update_dashboard_data(df):
 
 app.layout = html.Div(
     [
+        html.H1(Constants.TITLE_TEXT, style={"textAlign": "center"}),
         html.Div(
             [
-                dcc.Graph(
-                    id="traffic-graph", style={"height": f"{Constants.GRAPH_HEIGHT}px"}
+                dash_table.DataTable(
+                    id="traffic-table",
+                    columns=[
+                        {"name": "Time", "id": "timestamp"},
+                        {"name": "Traffic Type", "id": "Label"},
+                        {"name": "Packet Count", "id": "count"},
+                    ],
+                    style_table={
+                        "height": f"{Constants.GRAPH_HEIGHT}px",
+                        "overflowY": "auto",
+                    },
+                    style_cell={"textAlign": "center", "padding": "10px"},
+                    style_header={
+                        "backgroundColor": "rgb(230, 230, 230)",
+                        "fontWeight": "bold",
+                        "fontSize": f"{Constants.TICK_FONT_SIZE}px",
+                    },
+                    style_data_conditional=[
+                        {
+                            "if": {"filter_query": '{Label} != "BENIGN"'},
+                            "backgroundColor": Constants.ATTACK_TRAFFIC_FILL,
+                            "color": "black",
+                        },
+                        {
+                            "if": {"filter_query": '{Label} = "BENIGN"'},
+                            "backgroundColor": Constants.NORMAL_TRAFFIC_FILL,
+                            "color": "black",
+                        },
+                    ],
                 )
             ]
         ),
@@ -48,19 +74,43 @@ app.layout = html.Div(
 
 
 @app.callback(
-    Output("traffic-graph", "figure"),
-    Input("interval-component", "n_intervals"),
+    Output("traffic-table", "data"), Input("interval-component", "n_intervals")
 )
-def update_graphs(n):
+def update_table(n):
     # Use only the CSV files from the output directory
     csv_files = glob.glob("output/prediction_*.csv")
 
-    if csv_files:  # Only update if we have files to process
-        visualizer.update_traffic_plot(csv_files)
-        return visualizer.fig_traffic
+    if not csv_files:
+        return []
 
-    # Return empty figure if no data
-    return {}
+    # Read and combine all CSV files
+    dfs = []
+    for file in csv_files:
+        try:
+            df = pd.read_csv(file)
+            df["timestamp"] = pd.to_datetime(df["timestamp"])
+            dfs.append(df)
+        except Exception as e:
+            continue
+
+    if not dfs:
+        return []
+
+    # Combine all data
+    combined_df = pd.concat(dfs, ignore_index=True)
+
+    # Group by timestamp and Label to get counts
+    grouped_df = (
+        combined_df.groupby(["timestamp", "Label"]).size().reset_index(name="count")
+    )
+
+    # Sort by timestamp (newest first)
+    grouped_df = grouped_df.sort_values("timestamp", ascending=False)
+
+    # Format timestamp for display
+    grouped_df["timestamp"] = grouped_df["timestamp"].dt.strftime("%Y-%m-%d %H:%M:%S")
+
+    return grouped_df.to_dict("records")
 
 
 if __name__ == "__main__":
