@@ -36,7 +36,7 @@ app.layout = html.Div(
                     columns=[
                         {"name": "Time", "id": "timestamp"},
                         {"name": "Traffic Type", "id": "Label"},
-                        {"name": "Packet Count", "id": "count"},
+                        {"name": "Flow records count", "id": "count"},
                     ],
                     style_table={
                         "height": f"{Constants.GRAPH_HEIGHT}px",

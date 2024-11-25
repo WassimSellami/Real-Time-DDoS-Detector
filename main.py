@@ -2,7 +2,8 @@ import time
 from datetime import datetime
 from pyflowmeter.sniffer import create_sniffer
 from classifier import (
-    classify_input,
+    classify_input_cnn,
+    classify_input_decision_tree,
     filter_and_rename_features,
     list1,
     list2,
@@ -15,6 +16,7 @@ from constants import Constants
 from dashboard import app, update_dashboard_data
 from threading import Thread
 import shutil
+from tensorflow.keras.models import load_model
 
 SNIFTER_DURATION = 5
 
@@ -46,8 +48,9 @@ def main():
     with open("pickle/scaler.pkl", "rb") as scaler_file:
         loaded_scaler = pickle.load(scaler_file)
 
-    with open("pickle/ddos_decision_tree_model.pkl", "rb") as model_file:
-        loaded_model = pickle.load(model_file)
+    # with open("pickle/ddos_decision_tree_model.pkl", "rb") as model_file:
+    #     loaded_model = pickle.load(model_file)
+    loaded_model = load_model("h5/ddos_cnn_model.h5")
 
     try:
         while True:
@@ -78,7 +81,11 @@ def main():
 
                     renamed_df = filter_and_rename_features(df, list1, list2)
 
-                    predictions = classify_input(
+                    # predictions = classify_input_decision_tree(
+                    #     renamed_df, loaded_model, loaded_scaler, list2
+                    # )
+
+                    predictions = classify_input_cnn(
                         renamed_df, loaded_model, loaded_scaler, list2
                     )
 

@@ -26,9 +26,6 @@ def filter_and_rename_features(df, list1, list2):
 with open("pickle/scaler.pkl", "rb") as scaler_file:
     loaded_scaler = pickle.load(scaler_file)
 
-with open("pickle/ddos_decision_tree_model.pkl", "rb") as model_file:
-    loaded_model = pickle.load(model_file)
-
 list1 = [
     "totlen_fwd_pkts",
     "fwd_pkt_len_max",
@@ -71,8 +68,30 @@ list2 = [
 ]
 
 
-def classify_input(input_data, trained_model, scaler, selected_features):
+def classify_input_decision_tree(input_data, trained_model, scaler, selected_features):
     input_data = input_data.replace([np.inf, -np.inf], np.nan).dropna()
     input_data[selected_features] = scaler.transform(input_data[selected_features])
     predictions = trained_model.predict(input_data[selected_features])
     return predictions
+
+
+def classify_input_cnn(df, model, scaler, feature_list):
+    # Scale the features
+    scaled_features = scaler.transform(df[feature_list])
+
+    # Reshape the data for CNN input (samples, features, 1)
+    reshaped_data = scaled_features.reshape(-1, scaled_features.shape[1], 1)
+
+    # Get predictions
+    predictions = model.predict(reshaped_data)
+
+    # Convert predictions to labels
+    predictions = (predictions > 0.5).astype(int)
+
+    # Map numeric predictions to string labels
+    label_mapping = {0: "BENIGN", 1: "DDoS"}
+    string_predictions = np.array(
+        [label_mapping[pred] for pred in predictions.flatten()]
+    )
+
+    return string_predictions
