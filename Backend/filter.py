@@ -14,14 +14,13 @@ def block_ips(ips_to_block):
                 "firewall",
                 "add",
                 "rule",
-                "name=BlockIP_IN",
+                "name=BlockIP_OUT",
                 "dir=in",
                 "action=block",
                 f"remoteip={ip}",
                 "enable=yes",
             ]
         )
-        # Block outgoing traffic
         subprocess.run(
             [
                 "netsh",
@@ -29,8 +28,8 @@ def block_ips(ips_to_block):
                 "firewall",
                 "add",
                 "rule",
-                "name=BlockIP_OUT",
-                "dir=out",
+                "name=BlockIP_IN",
+                "dir=in",
                 "action=block",
                 f"remoteip={ip}",
                 "enable=yes",
@@ -43,10 +42,10 @@ def block_ips(ips_to_block):
 def cleanup_rules():
     # Remove both incoming and outgoing rules
     subprocess.run(
-        ["netsh", "advfirewall", "firewall", "delete", "rule", "name=BlockIP_IN"]
+        ["netsh", "advfirewall", "firewall", "delete", "rule", "name=BlockIP_OUT"]
     )
     subprocess.run(
-        ["netsh", "advfirewall", "firewall", "delete", "rule", "name=BlockIP_OUT"]
+        ["netsh", "advfirewall", "firewall", "delete", "rule", "name=BlockIP_IN"]
     )
 
     print("Unblocked IPs and cleaned up rules.")

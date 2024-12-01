@@ -59,6 +59,12 @@ def start_sniffing(interface="Ethernet"):
         loaded_model = pickle.load(model_file)
 
     blocked_ips = set()  # Set to store blocked IPs
+    blocked_ips_file = "blocked_ips.txt"  # File to store blocked IPs
+
+    # Load previously blocked IPs from file
+    if os.path.exists(blocked_ips_file):
+        with open(blocked_ips_file, "r") as f:
+            blocked_ips.update(f.read().splitlines())
 
     try:
         while running:
@@ -117,6 +123,11 @@ def start_sniffing(interface="Ethernet"):
 
                         # Update the blocked_ips set
                         blocked_ips.update(new_ddos_ips)
+
+                        # Save the updated blocked IPs to file
+                        with open(blocked_ips_file, "w") as f:
+                            for ip in blocked_ips:
+                                f.write(f"{ip}\n")
 
                     output_file = get_timestamped_filename(
                         output_folder, "prediction", ".csv"
