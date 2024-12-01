@@ -244,16 +244,13 @@
                         updateRecordCount();
                         $('#error-container').hide();
                         $('#table-container').show();
-                    } else {
-                        $('#error-message').text(response.message);
-                        $('#error-container').show();
-                        $('#table-container').hide();
                     }
                 },
                 error: function (xhr, status, error) {
-                    $('#error-message').text('Failed to fetch data: ' + error);
-                    $('#error-container').show();
-                    $('#table-container').hide();
+                    // Just hide any existing errors and show empty table
+                    $('#error-container').hide();
+                    $('#traffic-data').empty();
+                    updateRecordCount();
                 }
             });
         }
