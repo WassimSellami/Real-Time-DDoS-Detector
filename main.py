@@ -2,7 +2,6 @@ import time
 from datetime import datetime
 from pyflowmeter.sniffer import create_sniffer
 from classifier import (
-    classify_input_cnn,
     classify_input_decision_tree,
     filter_and_rename_features,
     list1,
@@ -13,10 +12,9 @@ import os
 import pickle
 import logging
 from constants import Constants
-from dashboard import app, update_dashboard_data
 from threading import Thread
 import shutil
-from tensorflow.keras.models import load_model
+from web_app import app as flask_app  # Import the Flask app
 
 SNIFTER_DURATION = 5
 
@@ -31,6 +29,10 @@ def clear_output_folder(folder):
     if os.path.exists(folder):
         shutil.rmtree(folder)
     os.makedirs(folder)
+
+
+def start_flask():
+    flask_app.run(host="127.0.0.1", port=3000)
 
 
 def main():
@@ -101,9 +103,6 @@ def main():
                     )
                     output_df.to_csv(output_file, index=False)
 
-                    # Update dashboard with new data
-                    update_dashboard_data(output_df)
-
                     logging.info(
                         f"Classification complete. Predictions saved to {output_file}"
                     )
@@ -128,10 +127,10 @@ def main():
 
 
 if __name__ == "__main__":
-    # Start the dashboard in a separate thread
-    dashboard_thread = Thread(target=app.run_server, kwargs={"debug": False})
-    dashboard_thread.daemon = True
-    dashboard_thread.start()
+    # Start Flask app in a separate thread
+    flask_thread = Thread(target=start_flask)
+    flask_thread.daemon = True
+    flask_thread.start()
 
-    # Run your main packet capture and analysis
+    # Run the main sniffer/classifier
     main()
