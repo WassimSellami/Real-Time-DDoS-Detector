@@ -38,7 +38,7 @@ def is_running():
     return running
 
 
-def start_sniffing():
+def start_sniffing(interface="Ethernet"):
     global running, current_sniffer
     running = True
 
@@ -61,7 +61,7 @@ def start_sniffing():
     try:
         while running:
             current_sniffer = create_sniffer(
-                input_interface=Constants.NETWORK_INTERFACE,
+                input_interface=interface,
                 to_csv=True,
                 output_file=classifier_input_file,
                 verbose=True,

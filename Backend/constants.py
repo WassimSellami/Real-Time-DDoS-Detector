@@ -45,6 +45,3 @@ class Constants:
     PREDICTION_FILE_PREFIX = "prediction"
     SCALER_PATH = "pickle/scaler.pkl"
     MODEL_PATH = "pickle/ddos_decision_tree_model.pkl"
-
-    # Network Interface
-    NETWORK_INTERFACE = "Ethernet"  # Change to "Wi-Fi" if using wireless connection

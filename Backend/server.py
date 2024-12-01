@@ -10,8 +10,9 @@ import shutil
 app = Flask(__name__)
 CORS(app)
 
-# Only track the process
+# Track both the process and current interface
 sniffing_process = None
+current_interface = "Ethernet"  # Default value
 
 
 @app.route("/status")
@@ -22,13 +23,19 @@ def get_status():
 
 @app.route("/control", methods=["POST"])
 def control_sniffing():
-    global sniffing_process
-    action = request.json.get("action")
+    global sniffing_process, current_interface
+    data = request.json
+    action = data.get("action")
+    interface = data.get("interface", "Ethernet")
 
     if action == "start":
         if not is_running():
             try:
-                sniffing_process = threading.Thread(target=start_sniffing)
+                current_interface = interface  # Update the current interface
+                sniffing_process = threading.Thread(
+                    target=start_sniffing,
+                    args=(interface,),
+                )
                 sniffing_process.daemon = True
                 sniffing_process.start()
                 return jsonify({"status": "success", "message": "Sniffing started"})
@@ -116,6 +123,12 @@ def clear_data():
         return jsonify({"status": "success", "message": "Data cleared successfully"})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)})
+
+
+@app.route("/get_interface")
+def get_interface():
+    global current_interface
+    return jsonify({"status": "success", "interface": current_interface})
 
 
 if __name__ == "__main__":
