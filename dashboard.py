@@ -35,8 +35,11 @@ app.layout = html.Div(
                     id="traffic-table",
                     columns=[
                         {"name": "Time", "id": "timestamp"},
+                        {"name": "Source IP", "id": "src_ip"},
+                        {"name": "Destination IP", "id": "dst_ip"},
+                        {"name": "Protocol", "id": "protocol"},
                         {"name": "Traffic Type", "id": "Label"},
-                        {"name": "Flow records count", "id": "count"},
+                        # Add any other columns you want to display
                     ],
                     style_table={
                         "height": f"{Constants.GRAPH_HEIGHT}px",
@@ -99,18 +102,14 @@ def update_table(n):
     # Combine all data
     combined_df = pd.concat(dfs, ignore_index=True)
 
-    # Group by timestamp and Label to get counts
-    grouped_df = (
-        combined_df.groupby(["timestamp", "Label"]).size().reset_index(name="count")
-    )
-
     # Sort by timestamp (newest first)
-    grouped_df = grouped_df.sort_values("timestamp", ascending=False)
+    combined_df = combined_df.sort_values("timestamp", ascending=False)
 
     # Format timestamp for display
-    grouped_df["timestamp"] = grouped_df["timestamp"].dt.strftime("%Y-%m-%d %H:%M:%S")
+    combined_df["timestamp"] = combined_df["timestamp"].dt.strftime("%Y-%m-%d %H:%M:%S")
 
-    return grouped_df.to_dict("records")
+    # Return all rows, no grouping
+    return combined_df.to_dict("records")
 
 
 if __name__ == "__main__":
