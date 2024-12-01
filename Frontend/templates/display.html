@@ -258,12 +258,11 @@
             });
         }
 
-        function updateButtonStates(isRunning) {
-            // Update button states
+        function updateButtonStates(action) {
+            const isRunning = action === 'start';
             document.getElementById('startBtn').disabled = isRunning;
             document.getElementById('stopBtn').disabled = !isRunning;
 
-            // Update status indicator
             const statusText = document.getElementById('status-text');
             statusText.textContent = isRunning ? 'Running' : 'Stopped';
             statusText.className = `badge badge-${isRunning ? 'success' : 'secondary'}`;
@@ -286,7 +285,7 @@
                 data: JSON.stringify({ action: action }),
                 success: function (response) {
                     if (response.status === 'success') {
-                        updateButtonStates(action === 'start');
+                        updateButtonStates(action);
                     } else {
                         alert(response.message);
                     }
@@ -299,7 +298,7 @@
 
         // Initialize with stopped state
         $(document).ready(function () {
-            updateButtonStates(false);
+            updateButtonStates('stop');
         });
     </script>
 </body>
