@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Traffic Data Display</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            padding: 8px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .error {
+            color: red;
+            padding: 20px;
+        }
+
+        .refresh-btn {
+            margin: 20px 0;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .refresh-btn:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Traffic Data</h1>
+
+    <button class="refresh-btn" onclick="location.reload()">Refresh Data</button>
+
+    {% if error %}
+    <div class="error">Error: {{ error }}</div>
+    {% else %}
+    <table>
+        <thead>
+            <tr>
+                <th>Source IP</th>
+                <th>Source Port</th>
+                <th>Destination IP</th>
+                <th>Destination Port</th>
+                <th>Label</th>
+                <th>Count</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in traffic_data %}
+            <tr>
+                <td>{{ item.src_ip }}</td>
+                <td>{{ item.src_port }}</td>
+                <td>{{ item.dst_ip }}</td>
+                <td>{{ item.dst_port }}</td>
+                <td>{{ item.Label }}</td>
+                <td>{{ item.count }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    <script>
+        // Auto-refresh every 5 seconds
+        setTimeout(function () {
+            location.reload();
+        }, 5000);
+    </script>
+</body>
+
+</html>
