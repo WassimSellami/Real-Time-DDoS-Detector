@@ -3,9 +3,58 @@ import pandas as pd
 import glob
 import os
 from flask_cors import CORS
+import threading
+from sniffer_controller import start_sniffing, stop_sniffing
 
 app = Flask(__name__)
 CORS(app)
+
+# Global variable to track the sniffing process
+sniffing_active = False
+sniffing_process = None
+
+
+@app.route("/control", methods=["POST"])
+def control_sniffing():
+    global sniffing_active, sniffing_process
+
+    action = request.json.get("action")
+
+    if action == "start":
+        if not sniffing_active:
+            try:
+                sniffing_active = True
+                sniffing_process = threading.Thread(target=start_sniffing)
+                sniffing_process.daemon = True
+                sniffing_process.start()
+                return jsonify({"status": "success", "message": "Sniffing started"})
+            except Exception as e:
+                sniffing_active = False
+                return jsonify(
+                    {"status": "error", "message": f"Failed to start: {str(e)}"}
+                )
+        return jsonify({"status": "warning", "message": "Already running"})
+
+    elif action == "stop":
+        if sniffing_active:
+            try:
+                sniffing_active = False
+                stop_sniffing()
+                if sniffing_process and sniffing_process.is_alive():
+                    sniffing_process.join(timeout=2)
+                return jsonify({"status": "success", "message": "Sniffing stopped"})
+            except Exception as e:
+                return jsonify(
+                    {"status": "error", "message": f"Failed to stop: {str(e)}"}
+                )
+        return jsonify({"status": "warning", "message": "Already stopped"})
+
+    return jsonify({"status": "error", "message": "Invalid action"})
+
+
+@app.route("/status")
+def get_status():
+    return jsonify({"status": "success", "sniffing": sniffing_active})
 
 
 @app.route("/")

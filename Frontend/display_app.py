@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, request
 import requests
 import logging
 import os
@@ -23,6 +23,24 @@ def get_data():
         return jsonify(data)
     except Exception as e:
         logging.error(f"Error occurred: {str(e)}")
+        return jsonify({"status": "error", "message": str(e)})
+
+
+@app.route("/control", methods=["POST"])
+def control_sniffing():
+    try:
+        response = requests.post("http://127.0.0.1:3000/control", json=request.json)
+        return jsonify(response.json())
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)})
+
+
+@app.route("/status")
+def get_status():
+    try:
+        response = requests.get("http://127.0.0.1:3000/status")
+        return jsonify(response.json())
+    except Exception as e:
         return jsonify({"status": "error", "message": str(e)})
 
 

@@ -103,8 +103,21 @@
                     Records shown: 0
                 </span>
             </div>
+            <div class="col text-center">
+                <div class="btn-group" role="group">
+                    <button id="startBtn" class="btn btn-success" onclick="controlSniffing('start')">
+                        <i class="fas fa-play"></i> Start
+                    </button>
+                    <button id="stopBtn" class="btn btn-danger" onclick="controlSniffing('stop')" disabled>
+                        <i class="fas fa-stop"></i> Stop
+                    </button>
+                </div>
+                <span id="status-indicator" class="ml-3">
+                    Status: <span id="status-text" class="badge badge-secondary">Stopped</span>
+                </span>
+            </div>
             <div class="col text-right">
-                <button class="btn btn-danger" onclick="clearHistory()">Clear History</button>
+                <button class="btn btn-warning" onclick="clearHistory()">Clear History</button>
             </div>
         </div>
         <div id="error-container" style="display: none;">
@@ -130,6 +143,9 @@
             </table>
         </div>
     </div>
+
+    <!-- Add Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
     <script>
         // Store all traffic data
@@ -209,8 +225,54 @@
             });
         }
 
-        updateTable();
-        setInterval(updateTable, 5000);
+        function updateButtonStates(isRunning) {
+            document.getElementById('startBtn').disabled = isRunning;
+            document.getElementById('stopBtn').disabled = !isRunning;
+
+            const statusText = document.getElementById('status-text');
+            statusText.textContent = isRunning ? 'Running' : 'Stopped';
+            statusText.className = `badge badge-${isRunning ? 'success' : 'secondary'}`;
+        }
+
+        function controlSniffing(action) {
+            $.ajax({
+                url: '/control',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ action: action }),
+                success: function (response) {
+                    if (response.status === 'success') {
+                        updateButtonStates(action === 'start');
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert('Failed to control sniffing: ' + error);
+                }
+            });
+        }
+
+        // Add status check to your existing updateTable function
+        function checkStatus() {
+            $.ajax({
+                url: '/status',
+                method: 'GET',
+                success: function (response) {
+                    if (response.status === 'success') {
+                        updateButtonStates(response.sniffing);
+                    }
+                }
+            });
+        }
+
+        // Modify your existing initialization code
+        $(document).ready(function () {
+            updateTable();
+            checkStatus();  // Check initial status
+            setInterval(updateTable, 5000);
+            setInterval(checkStatus, 5000);  // Regular status updates
+        });
     </script>
 </body>
 
