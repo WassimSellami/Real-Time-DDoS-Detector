@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, jsonify
 import requests
 import logging
 import os
@@ -9,23 +9,21 @@ logging.basicConfig(level=logging.DEBUG)
 
 @app.route("/")
 def index():
+    return render_template("display.html")
+
+
+@app.route("/get_data")
+def get_data():
     try:
         # Fetch data from the API
         logging.debug("Attempting to fetch data from API...")
         response = requests.get("http://127.0.0.1:3000/")
         data = response.json()
         logging.debug(f"Received data: {data}")
-
-        if data["status"] == "success":
-            logging.debug("Rendering template with traffic data...")
-            return render_template("display.html", traffic_data=data["data"])
-        else:
-            logging.error(f"API returned error: {data['message']}")
-            return render_template("display.html", error=data["message"])
-
+        return jsonify(data)
     except Exception as e:
         logging.error(f"Error occurred: {str(e)}")
-        return render_template("display.html", error=str(e))
+        return jsonify({"status": "error", "message": str(e)})
 
 
 if __name__ == "__main__":

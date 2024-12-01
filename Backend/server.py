@@ -10,29 +10,30 @@ CORS(app)
 
 @app.route("/")
 def index():
-    try:
-        # Get the latest prediction file
-        prediction_files = glob.glob("output/prediction_*.csv")
-        if not prediction_files:
-            return jsonify({"status": "success", "data": []})
+    # Get all prediction files
+    prediction_files = glob.glob("output/prediction_*.csv")
 
-        # Read the most recent file
+    if not prediction_files:
+        return jsonify({"status": "error", "message": "No data available"})
+
+    try:
+        # Get the most recent file based on creation time
         latest_file = max(prediction_files, key=os.path.getctime)
+
+        # Read only the latest file
         df = pd.read_csv(latest_file)
 
-        # Group by source IP, destination IP, ports and Label
-        grouped_data = (
-            df.groupby(["src_ip", "src_port", "dst_ip", "dst_port", "Label"])
-            .size()
-            .reset_index(name="count")
-        )
+        # Sort by timestamp (newest first)
+        df = df.sort_values("timestamp", ascending=False)
 
-        # Convert DataFrame to dictionary format
-        data = grouped_data.to_dict(orient="records")
+        # Convert to list of dictionaries for JSON response
+        traffic_data = df[
+            ["src_ip", "src_port", "dst_ip", "dst_port", "Label", "timestamp"]
+        ].to_dict("records")
 
-        return jsonify({"status": "success", "data": data})
+        return jsonify({"status": "success", "data": traffic_data})
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({"status": "error", "message": str(e)})
 
 
 @app.route("/traffic", methods=["GET", "POST"])

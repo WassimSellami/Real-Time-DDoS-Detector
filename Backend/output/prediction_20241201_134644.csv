@@ -1,2 +1,0 @@
-src_ip,src_port,dst_ip,dst_port,Total Length of Fwd Packet,Fwd Packet Length Max,Fwd Packet Length Mean,Bwd Packet Length Max,Bwd Packet Length Min,Bwd Packet Length Mean,Bwd Packet Length Std,Packet Length Max,Packet Length Min,Packet Length Mean,Packet Length Std,Packet Length Variance,Bwd IAT Total,URG Flag Count,Average Packet Size,Fwd Segment Size Avg,Bwd Segment Size Avg,Subflow Fwd Bytes,Label
-192.168.0.104,57904,3.208.45.227,443,109,55.0,54.5,78.0,66.0,72.0,6.0,78,54,63.25,9.730750228014282,94.6875,0.0,0,63.25,54.5,72.0,109,BENIGN

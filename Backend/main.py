@@ -14,7 +14,7 @@ import logging
 from constants import Constants
 from threading import Thread
 import shutil
-from web_app import app as flask_app
+from server import app as flask_app
 
 SNIFTER_DURATION = 5
 
@@ -94,6 +94,9 @@ def main():
 
                     output_df = pd.concat([network_details, renamed_df], axis=1)
                     output_df["Label"] = predictions
+                    output_df["timestamp"] = datetime.now().strftime(
+                        "%Y-%m-%d %H:%M:%S"
+                    )
 
                     output_file = get_timestamped_filename(
                         output_folder, "prediction", ".csv"
