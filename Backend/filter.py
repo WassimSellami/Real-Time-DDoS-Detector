@@ -21,6 +21,22 @@ def block_ips():
                 "enable=yes",
             ]
         )
+        # Block outgoing traffic
+        subprocess.run(
+            [
+                "netsh",
+                "advfirewall",
+                "firewall",
+                "add",
+                "rule",
+                "name=BlockIP_OUT",
+                "dir=out",
+                "action=block",
+                f"remoteip={ip}",
+                "enable=yes",
+            ]
+        )
+
         print(f"Blocked IP: {ip} (incoming traffic)")
 
 
@@ -29,4 +45,8 @@ def cleanup_rules():
     subprocess.run(
         ["netsh", "advfirewall", "firewall", "delete", "rule", "name=BlockIP_IN"]
     )
+    subprocess.run(
+        ["netsh", "advfirewall", "firewall", "delete", "rule", "name=BlockIP_OUT"]
+    )
+
     print("Unblocked IPs and cleaned up rules.")
