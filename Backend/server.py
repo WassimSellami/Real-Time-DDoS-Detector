@@ -5,6 +5,7 @@ import os
 from flask_cors import CORS
 import threading
 from sniffer_controller import start_sniffing, stop_sniffing
+import shutil
 
 app = Flask(__name__)
 CORS(app)
@@ -106,6 +107,19 @@ def get_traffic():
         return jsonify(last_prediction)
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@app.route("/clear", methods=["POST"])
+def clear_data():
+    try:
+        output_folder = "output"
+        # Remove the entire output folder and recreate it
+        if os.path.exists(output_folder):
+            shutil.rmtree(output_folder)
+        os.makedirs(output_folder)
+        return jsonify({"status": "success", "message": "Data cleared successfully"})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)})
 
 
 if __name__ == "__main__":

@@ -44,6 +44,15 @@ def get_status():
         return jsonify({"status": "error", "message": str(e)})
 
 
+@app.route("/clear", methods=["POST"])
+def clear_data():
+    try:
+        response = requests.post("http://127.0.0.1:3000/clear")
+        return jsonify(response.json())
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)})
+
+
 if __name__ == "__main__":
     template_dir = os.path.abspath("templates")
     logging.info(f"Template directory: {template_dir}")

@@ -156,10 +156,43 @@
         }
 
         function clearHistory() {
-            allTrafficData = [];
-            updateTable();
-            updateRecordCount();
+            $.ajax({
+                url: '/clear',
+                method: 'POST',
+                success: function (response) {
+                    if (response.status === 'success') {
+                        // Stop any pending updates
+                        clearInterval(updateInterval);
+
+                        // Clear frontend data array
+                        allTrafficData = [];  // Create a new empty array instead of just clearing length
+
+                        // Clear the table display
+                        const tbody = $('#traffic-data');
+                        tbody.empty();
+
+                        // Update the record count to show 0
+                        updateRecordCount();
+
+                        // Hide any errors if they were showing
+                        $('#error-container').hide();
+
+                        // Restart updates after a brief pause
+                        setTimeout(() => {
+                            updateInterval = setInterval(updateTable, 5000);
+                        }, 1000);
+                    } else {
+                        alert('Failed to clear data: ' + response.message);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert('Failed to clear data: ' + error);
+                }
+            });
         }
+
+        // Store interval ID for updates
+        let updateInterval;
 
         function mergeNewData(newData) {
             // Create a map of existing timestamps for quick lookup
@@ -270,7 +303,7 @@
         $(document).ready(function () {
             updateTable();
             checkStatus();  // Check initial status
-            setInterval(updateTable, 5000);
+            updateInterval = setInterval(updateTable, 5000);
             setInterval(checkStatus, 5000);  // Regular status updates
         });
     </script>
