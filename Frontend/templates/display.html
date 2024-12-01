@@ -296,9 +296,23 @@
             });
         }
 
-        // Initialize with stopped state
+        // Initialize with actual backend state
         $(document).ready(function () {
-            updateButtonStates('stop');
+            // Check actual running state from backend
+            $.ajax({
+                url: '/status',
+                method: 'GET',
+                success: function (response) {
+                    if (response.status === 'success') {
+                        updateButtonStates(response.sniffing ? 'start' : 'stop');
+                    } else {
+                        updateButtonStates('stop');  // Default to stopped if error
+                    }
+                },
+                error: function () {
+                    updateButtonStates('stop');  // Default to stopped if error
+                }
+            });
         });
     </script>
 </body>

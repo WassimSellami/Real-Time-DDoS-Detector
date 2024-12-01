@@ -33,6 +33,11 @@ def clear_output_folder(folder):
     os.makedirs(folder)
 
 
+def is_running():
+    global running
+    return running
+
+
 def start_sniffing():
     global running, current_sniffer
     running = True

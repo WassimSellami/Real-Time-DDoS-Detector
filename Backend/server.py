@@ -4,14 +4,20 @@ import glob
 import os
 from flask_cors import CORS
 import threading
-from sniffer_controller import start_sniffing, stop_sniffing
+from sniffer_controller import start_sniffing, stop_sniffing, is_running
 import shutil
 
 app = Flask(__name__)
 CORS(app)
 
-# Only track the process, no need for status
+# Only track the process
 sniffing_process = None
+
+
+@app.route("/status")
+def get_status():
+    # Get actual running state from sniffer_controller
+    return jsonify({"status": "success", "sniffing": is_running()})
 
 
 @app.route("/control", methods=["POST"])
@@ -20,22 +26,30 @@ def control_sniffing():
     action = request.json.get("action")
 
     if action == "start":
-        try:
-            sniffing_process = threading.Thread(target=start_sniffing)
-            sniffing_process.daemon = True
-            sniffing_process.start()
-            return jsonify({"status": "success", "message": "Sniffing started"})
-        except Exception as e:
-            return jsonify({"status": "error", "message": f"Failed to start: {str(e)}"})
+        if not is_running():
+            try:
+                sniffing_process = threading.Thread(target=start_sniffing)
+                sniffing_process.daemon = True
+                sniffing_process.start()
+                return jsonify({"status": "success", "message": "Sniffing started"})
+            except Exception as e:
+                return jsonify(
+                    {"status": "error", "message": f"Failed to start: {str(e)}"}
+                )
+        return jsonify({"status": "warning", "message": "Already running"})
 
     elif action == "stop":
-        try:
-            stop_sniffing()
-            if sniffing_process and sniffing_process.is_alive():
-                sniffing_process.join(timeout=2)
-            return jsonify({"status": "success", "message": "Sniffing stopped"})
-        except Exception as e:
-            return jsonify({"status": "error", "message": f"Failed to stop: {str(e)}"})
+        if is_running():
+            try:
+                stop_sniffing()
+                if sniffing_process and sniffing_process.is_alive():
+                    sniffing_process.join(timeout=2)
+                return jsonify({"status": "success", "message": "Sniffing stopped"})
+            except Exception as e:
+                return jsonify(
+                    {"status": "error", "message": f"Failed to stop: {str(e)}"}
+                )
+        return jsonify({"status": "warning", "message": "Already stopped"})
 
     return jsonify({"status": "error", "message": "Invalid action"})
 
@@ -46,7 +60,7 @@ def index():
     prediction_files = glob.glob("output/prediction_*.csv")
 
     if not prediction_files:
-        return jsonify({"status": "error", "message": "No data available"})
+        return jsonify({"status": "success", "data": []})
 
     try:
         # Get the most recent file based on creation time
@@ -65,7 +79,7 @@ def index():
 
         return jsonify({"status": "success", "data": traffic_data})
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)})
+        return jsonify({"status": "success", "data": []})
 
 
 @app.route("/traffic", methods=["GET", "POST"])
