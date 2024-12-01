@@ -58,6 +58,8 @@ def start_sniffing(interface="Ethernet"):
     with open("pickle/ddos_decision_tree_model.pkl", "rb") as model_file:
         loaded_model = pickle.load(model_file)
 
+    blocked_ips = set()  # Set to store blocked IPs
+
     try:
         while running:
             current_sniffer = create_sniffer(
@@ -100,6 +102,22 @@ def start_sniffing(interface="Ethernet"):
                         "%Y-%m-%d %H:%M:%S"
                     )
 
+                    ddos_ips = output_df.loc[
+                        output_df["Label"] == "DDoS", "src_ip"
+                    ].unique()
+
+                    # Filter out already blocked IPs
+                    new_ddos_ips = set(ddos_ips) - blocked_ips
+
+                    if new_ddos_ips:
+                        from filter import block_ips, cleanup_rules
+
+                        block_ips(new_ddos_ips)
+                        logging.info(f"Blocked new IPs: {new_ddos_ips}")
+
+                        # Update the blocked_ips set
+                        blocked_ips.update(new_ddos_ips)
+
                     output_file = get_timestamped_filename(
                         output_folder, "prediction", ".csv"
                     )
@@ -128,6 +146,11 @@ def start_sniffing(interface="Ethernet"):
     finally:
         if current_sniffer is not None and current_sniffer.running:
             current_sniffer.stop()
+        # Clean up firewall rules
+        from filter import cleanup_rules
+
+        cleanup_rules()
+        logging.info("Cleaned up firewall rules.")
 
 
 def stop_sniffing():

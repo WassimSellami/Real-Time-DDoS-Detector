@@ -1,11 +1,11 @@
 import subprocess
 
 # List of blocked IPs
-blocked_ips = ["142.251.37.14"]  # Add IPs you want to block here
+# blocked_ips = ["142.251.37.14"]  # Add IPs you want to block here
 
 
-def block_ips():
-    for ip in blocked_ips:
+def block_ips(ips_to_block):
+    for ip in ips_to_block:
         # Block incoming traffic
         subprocess.run(
             [
@@ -37,7 +37,7 @@ def block_ips():
             ]
         )
 
-        print(f"Blocked IP: {ip} (incoming traffic)")
+        print(f"Blocked IP: {ip} (incoming and outgoing traffic)")
 
 
 def cleanup_rules():

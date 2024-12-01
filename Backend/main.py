@@ -34,8 +34,6 @@ if __name__ == "__main__":
     flask_thread.start()
 
     # Block IPs
-    block_ips()
-    print("IPs have been blocked. Press Ctrl+C to unblock.")
 
     # Keep the server running
     try:
