@@ -104,17 +104,23 @@
                 </span>
             </div>
             <div class="col text-center">
-                <div class="btn-group" role="group">
-                    <button id="startBtn" class="btn btn-success" onclick="controlSniffing('start')">
-                        <i class="fas fa-play"></i> Start
-                    </button>
-                    <button id="stopBtn" class="btn btn-danger" onclick="controlSniffing('stop')" disabled>
-                        <i class="fas fa-stop"></i> Stop
-                    </button>
+                <div class="form-inline justify-content-center">
+                    <select id="networkInterface" class="form-control mr-2">
+                        <option value="Ethernet">Ethernet</option>
+                        <option value="Wi-Fi">Wi-Fi</option>
+                    </select>
+                    <div class="btn-group" role="group">
+                        <button id="startBtn" class="btn btn-success" onclick="controlSniffing('start')">
+                            <i class="fas fa-play"></i> Start
+                        </button>
+                        <button id="stopBtn" class="btn btn-danger" onclick="controlSniffing('stop')" disabled>
+                            <i class="fas fa-stop"></i> Stop
+                        </button>
+                    </div>
+                    <span id="status-indicator" class="ml-3">
+                        Status: <span id="status-text" class="badge badge-secondary">Stopped</span>
+                    </span>
                 </div>
-                <span id="status-indicator" class="ml-3">
-                    Status: <span id="status-text" class="badge badge-secondary">Stopped</span>
-                </span>
             </div>
             <div class="col text-right">
                 <button class="btn btn-warning" onclick="clearHistory()">Clear History</button>
@@ -275,14 +281,21 @@
         }
 
         function controlSniffing(action) {
+            const networkInterface = $('#networkInterface').val();
+
             $.ajax({
                 url: '/control',
                 method: 'POST',
                 contentType: 'application/json',
-                data: JSON.stringify({ action: action }),
+                data: JSON.stringify({
+                    action: action,
+                    interface: networkInterface
+                }),
                 success: function (response) {
                     if (response.status === 'success') {
                         updateButtonStates(action);
+                        // Disable interface selection while running
+                        $('#networkInterface').prop('disabled', action === 'start');
                     } else {
                         alert(response.message);
                     }
@@ -308,6 +321,17 @@
                 },
                 error: function () {
                     updateButtonStates('stop');  // Default to stopped if error
+                }
+            });
+
+            // Set initial interface value from backend
+            $.ajax({
+                url: '/get_interface',
+                method: 'GET',
+                success: function (response) {
+                    if (response.status === 'success') {
+                        $('#networkInterface').val(response.interface);
+                    }
                 }
             });
         });
