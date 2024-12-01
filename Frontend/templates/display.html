@@ -192,7 +192,7 @@
         }
 
         // Store interval ID for updates
-        let updateInterval;
+        let updateInterval = null;
 
         function mergeNewData(newData) {
             // Create a map of existing timestamps for quick lookup
@@ -259,12 +259,23 @@
         }
 
         function updateButtonStates(isRunning) {
+            // Update button states
             document.getElementById('startBtn').disabled = isRunning;
             document.getElementById('stopBtn').disabled = !isRunning;
 
+            // Update status indicator
             const statusText = document.getElementById('status-text');
             statusText.textContent = isRunning ? 'Running' : 'Stopped';
             statusText.className = `badge badge-${isRunning ? 'success' : 'secondary'}`;
+
+            // Manage data updates
+            if (isRunning) {
+                updateTable(); // Get initial data
+                updateInterval = setInterval(updateTable, 5000);
+            } else {
+                clearInterval(updateInterval);
+                updateInterval = null;
+            }
         }
 
         function controlSniffing(action) {
@@ -286,25 +297,9 @@
             });
         }
 
-        // Add status check to your existing updateTable function
-        function checkStatus() {
-            $.ajax({
-                url: '/status',
-                method: 'GET',
-                success: function (response) {
-                    if (response.status === 'success') {
-                        updateButtonStates(response.sniffing);
-                    }
-                }
-            });
-        }
-
-        // Modify your existing initialization code
+        // Initialize with stopped state
         $(document).ready(function () {
-            updateTable();
-            checkStatus();  // Check initial status
-            updateInterval = setInterval(updateTable, 5000);
-            setInterval(checkStatus, 5000);  // Regular status updates
+            updateButtonStates(false);
         });
     </script>
 </body>
