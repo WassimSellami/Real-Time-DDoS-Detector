@@ -48,9 +48,9 @@ def main():
     with open("pickle/scaler.pkl", "rb") as scaler_file:
         loaded_scaler = pickle.load(scaler_file)
 
-    # with open("pickle/ddos_decision_tree_model.pkl", "rb") as model_file:
-    #     loaded_model = pickle.load(model_file)
-    loaded_model = load_model("h5/ddos_cnn_model.h5")
+    with open("pickle/ddos_decision_tree_model.pkl", "rb") as model_file:
+        loaded_model = pickle.load(model_file)
+    # loaded_model = load_model("h5/ddos_cnn_model.h5")
 
     try:
         while True:
@@ -81,13 +81,13 @@ def main():
 
                     renamed_df = filter_and_rename_features(df, list1, list2)
 
-                    # predictions = classify_input_decision_tree(
-                    #     renamed_df, loaded_model, loaded_scaler, list2
-                    # )
-
-                    predictions = classify_input_cnn(
+                    predictions = classify_input_decision_tree(
                         renamed_df, loaded_model, loaded_scaler, list2
                     )
+
+                    # predictions = classify_input_cnn(
+                    #     renamed_df, loaded_model, loaded_scaler, list2
+                    # )
 
                     output_file = get_timestamped_filename(
                         output_folder, "prediction", ".csv"
