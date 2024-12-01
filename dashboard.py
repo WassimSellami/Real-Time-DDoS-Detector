@@ -36,10 +36,10 @@ app.layout = html.Div(
                     columns=[
                         {"name": "Time", "id": "timestamp"},
                         {"name": "Source IP", "id": "src_ip"},
+                        {"name": "Source Port", "id": "src_port"},
                         {"name": "Destination IP", "id": "dst_ip"},
-                        {"name": "Protocol", "id": "protocol"},
+                        {"name": "Destination Port", "id": "dst_port"},
                         {"name": "Traffic Type", "id": "Label"},
-                        # Add any other columns you want to display
                     ],
                     style_table={
                         "height": f"{Constants.GRAPH_HEIGHT}px",

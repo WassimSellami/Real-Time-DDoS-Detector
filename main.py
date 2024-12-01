@@ -81,6 +81,9 @@ def main():
 
                     renamed_df = filter_and_rename_features(df, list1, list2)
 
+                    # Keep network details before classification
+                    network_details = df[["src_ip", "src_port", "dst_ip", "dst_port"]]
+
                     predictions = classify_input_decision_tree(
                         renamed_df, loaded_model, loaded_scaler, list2
                     )
@@ -89,14 +92,17 @@ def main():
                     #     renamed_df, loaded_model, loaded_scaler, list2
                     # )
 
+                    # Add network details and predictions to the output DataFrame
+                    output_df = pd.concat([network_details, renamed_df], axis=1)
+                    output_df["Label"] = predictions
+
                     output_file = get_timestamped_filename(
                         output_folder, "prediction", ".csv"
                     )
-                    renamed_df["Label"] = predictions
-                    renamed_df.to_csv(output_file, index=False)
+                    output_df.to_csv(output_file, index=False)
 
                     # Update dashboard with new data
-                    update_dashboard_data(renamed_df)
+                    update_dashboard_data(output_df)
 
                     logging.info(
                         f"Classification complete. Predictions saved to {output_file}"
