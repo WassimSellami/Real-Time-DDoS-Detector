@@ -25,6 +25,9 @@ if __name__ == "__main__":
 
     # Import after admin check to avoid import errors
     from server import app as flask_app
+    from sniffer_controller import SnifferController
+
+    sniffer_controller = SnifferController()  # Create an instance of SnifferController
 
     def start_flask():
         flask_app.run(host="127.0.0.1", port=3000)

@@ -4,7 +4,7 @@ import glob
 import os
 from flask_cors import CORS
 import threading
-from sniffer_controller import start_sniffing, stop_sniffing, is_running
+from sniffer_controller import SnifferController
 import shutil
 
 app = Flask(__name__)
@@ -13,12 +13,13 @@ CORS(app)
 # Track both the process and current interface
 sniffing_process = None
 current_interface = "Ethernet"  # Default value
+sniffer_controller = SnifferController()  # Create an instance of SnifferController
 
 
 @app.route("/status")
 def get_status():
     # Get actual running state from sniffer_controller
-    return jsonify({"status": "success", "sniffing": is_running()})
+    return jsonify({"status": "success", "sniffing": sniffer_controller.is_running()})
 
 
 @app.route("/control", methods=["POST"])
@@ -29,11 +30,11 @@ def control_sniffing():
     interface = data.get("interface", "Ethernet")
 
     if action == "start":
-        if not is_running():
+        if not sniffer_controller.is_running():
             try:
                 current_interface = interface  # Update the current interface
                 sniffing_process = threading.Thread(
-                    target=start_sniffing,
+                    target=sniffer_controller.start_sniffing,
                     args=(interface,),
                 )
                 sniffing_process.daemon = True
@@ -46,9 +47,9 @@ def control_sniffing():
         return jsonify({"status": "warning", "message": "Already running"})
 
     elif action == "stop":
-        if is_running():
+        if sniffer_controller.is_running():
             try:
-                stop_sniffing()
+                sniffer_controller.stop_sniffing()
                 if sniffing_process and sniffing_process.is_alive():
                     sniffing_process.join(timeout=2)
                 return jsonify({"status": "success", "message": "Sniffing stopped"})
