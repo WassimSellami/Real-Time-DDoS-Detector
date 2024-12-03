@@ -1,3 +1,5 @@
+import os
+import socket
 import time
 from datetime import datetime
 from pyflowmeter.sniffer import create_sniffer
@@ -8,7 +10,6 @@ from classifier import (
     list2,
 )
 import pandas as pd
-import os
 import pickle
 import logging
 from constants import Constants
@@ -52,6 +53,10 @@ def start_sniffing(interface="Ethernet"):
 
     classifier_input_file = "./input/classifier_input.csv"
 
+    # Ensure the input directory exists
+    if not os.path.exists(input_folder):
+        os.makedirs(input_folder)
+
     with open("pickle/scaler.pkl", "rb") as scaler_file:
         loaded_scaler = pickle.load(scaler_file)
 
@@ -83,7 +88,8 @@ def start_sniffing(interface="Ethernet"):
 
                 time.sleep(SNIFTER_DURATION)
 
-                current_sniffer.stop()
+                if current_sniffer.running:
+                    current_sniffer.stop()
                 logging.info("Sniffer stopped.")
 
                 if not running:
@@ -108,8 +114,14 @@ def start_sniffing(interface="Ethernet"):
                         "%Y-%m-%d %H:%M:%S"
                     )
 
+                    # Get the local IP address dynamically
+                    my_network_ip = socket.gethostbyname(socket.gethostname())
+
+                    # Identify DDoS IPs that are inbound
                     ddos_ips = output_df.loc[
-                        output_df["Label"] == "DDoS", "src_ip"
+                        (output_df["Label"] == "BENIGN")
+                        & ~(output_df["src_ip"] == my_network_ip),
+                        "src_ip",
                     ].unique()
 
                     # Filter out already blocked IPs
@@ -146,7 +158,7 @@ def start_sniffing(interface="Ethernet"):
                 logging.error(
                     "Encountered ZeroDivisionError during packet processing. Retrying..."
                 )
-                if current_sniffer is not None:
+                if current_sniffer is not None and current_sniffer.running:
                     current_sniffer.stop()
                 if not running:
                     break

@@ -1,13 +1,10 @@
 import subprocess
 
-# List of blocked IPs
-# blocked_ips = ["142.251.37.14"]  # Add IPs you want to block here
-
 
 def block_ips(ips_to_block):
     for ip in ips_to_block:
-        # Block incoming traffic
-        subprocess.run(
+
+        result_out = subprocess.run(
             [
                 "netsh",
                 "advfirewall",
@@ -15,13 +12,16 @@ def block_ips(ips_to_block):
                 "add",
                 "rule",
                 "name=BlockIP_OUT",
-                "dir=in",
+                "dir=out",
                 "action=block",
                 f"remoteip={ip}",
                 "enable=yes",
-            ]
+            ],
+            capture_output=True,
+            text=True,
         )
-        subprocess.run(
+
+        result_in = subprocess.run(
             [
                 "netsh",
                 "advfirewall",
@@ -33,8 +33,16 @@ def block_ips(ips_to_block):
                 "action=block",
                 f"remoteip={ip}",
                 "enable=yes",
-            ]
+            ],
+            capture_output=True,
+            text=True,
         )
+        if result_in.returncode == 0:
+            print(f"Successfully blocked incoming traffic for IP: {ip}")
+        else:
+            print(
+                f"Failed to block incoming traffic for IP: {ip}. Error: {result_in.stderr}"
+            )
 
         print(f"Blocked IP: {ip} (incoming and outgoing traffic)")
 
