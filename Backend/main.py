@@ -14,12 +14,12 @@ def is_admin():
 
 
 if __name__ == "__main__":
-    if not is_admin():
-        # Re-run the program with admin rights
-        ctypes.windll.shell32.ShellExecuteW(
-            None, "runas", sys.executable, " ".join(sys.argv), None, 1
-        )
-        sys.exit()
+    # if not is_admin():
+    #     # Re-run the program with admin rights
+    #     ctypes.windll.shell32.ShellExecuteW(
+    #         None, "runas", sys.executable, " ".join(sys.argv), None, 1
+    #     )
+    #     sys.exit()
 
     # Import after admin check to avoid import errors
     from server import app as flask_app

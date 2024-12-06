@@ -6,13 +6,14 @@ from flask_cors import CORS
 import threading
 from sniffer_controller import SnifferController
 import shutil
+from utils import get_active_interface
 
 app = Flask(__name__)
 CORS(app)
 
 # Track both the process and current interface
 sniffing_process = None
-current_interface = "eth0"  # Default value
+current_interface = get_active_interface() # Default value 
 sniffer_controller = SnifferController()  # Create an instance of SnifferController
 
 
@@ -27,15 +28,15 @@ def control_sniffing():
     global sniffing_process, current_interface
     data = request.json
     action = data.get("action")
-    interface = data.get("interface", "Ethernet")
+    # interface = data.get("interface", "Ethernet")
 
     if action == "start":
         if not sniffer_controller.is_running():
             try:
-                current_interface = interface  # Update the current interface
+                # current_interface = interface  # Update the current interface
                 sniffing_process = threading.Thread(
                     target=sniffer_controller.start_sniffing,
-                    args=(interface,),
+                    args=(current_interface,),
                 )
                 sniffing_process.daemon = True
                 sniffing_process.start()

@@ -2,6 +2,7 @@ import os
 import socket
 import time
 from datetime import datetime
+from utils import NetworkUtils
 from pyflowmeter.sniffer import create_sniffer
 from classifier import (
     classify_input_decision_tree,
@@ -24,9 +25,8 @@ class SnifferController:
     def __init__(self):
         self.running = False
         self.current_sniffer = None
-        self.my_network_ip = socket.gethostbyname(socket.gethostname())
-        self.subnet_mask = self.get_local_subnet_mask()
-
+        self.network_utils = NetworkUtils()
+   
     def get_timestamped_filename(self, base_path, prefix, extension):
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         return os.path.join(base_path, f"{prefix}_{timestamp}{extension}")
@@ -135,7 +135,7 @@ class SnifferController:
                         # Identify DDoS IPs that are inbound
                         ddos_ips = output_df.loc[
                             (output_df["Label"] == "BENIGN")
-                            & ~output_df["src_ip"].apply(self.is_local_ip),
+                            & ~output_df["src_ip"].apply(self.network_utils.is_local_ip),
                             "src_ip",
                         ].unique()
 
