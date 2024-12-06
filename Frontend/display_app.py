@@ -2,9 +2,30 @@ from flask import Flask, render_template, jsonify, request
 import requests
 import logging
 import os
+from urllib.parse import urljoin
 
-app = Flask(__name__, template_folder=os.path.abspath("templates"))
+# Application Constants
+APP_HOST = "0.0.0.0"
+APP_PORT = 5000
+TEMPLATE_DIR = os.path.abspath("templates")
+
+# API Configuration
+API_BASE_URL = os.getenv("API_BASE_URL", "http://backend:3000")
+API_ENDPOINTS = {
+    "data": "/",
+    "control": "/control",
+    "clear": "/clear",
+    "status": "/status",
+}
+
+# Initialize Flask app
+app = Flask(__name__, template_folder=TEMPLATE_DIR)
 logging.basicConfig(level=logging.DEBUG)
+
+
+def get_api_url(endpoint):
+    """Helper function to construct API URLs"""
+    return urljoin(API_BASE_URL, API_ENDPOINTS[endpoint])
 
 
 @app.route("/")
@@ -15,9 +36,8 @@ def index():
 @app.route("/get_data")
 def get_data():
     try:
-        # Fetch data from the API
         logging.debug("Attempting to fetch data from API...")
-        response = requests.get("http://127.0.0.1:3000/")
+        response = requests.get(get_api_url("data"))
         data = response.json()
         logging.debug(f"Received data: {data}")
         return jsonify(data)
@@ -29,7 +49,7 @@ def get_data():
 @app.route("/control", methods=["POST"])
 def control_sniffing():
     try:
-        response = requests.post("http://127.0.0.1:3000/control", json=request.json)
+        response = requests.post(get_api_url("control"), json=request.json)
         return jsonify(response.json())
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)})
@@ -38,7 +58,7 @@ def control_sniffing():
 @app.route("/clear", methods=["POST"])
 def clear_data():
     try:
-        response = requests.post("http://127.0.0.1:3000/clear")
+        response = requests.post(get_api_url("clear"))
         return jsonify(response.json())
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)})
@@ -47,14 +67,13 @@ def clear_data():
 @app.route("/status")
 def get_status():
     try:
-        response = requests.get("http://127.0.0.1:3000/status")
+        response = requests.get(get_api_url("status"))
         return jsonify(response.json())
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)})
 
 
 if __name__ == "__main__":
-    template_dir = os.path.abspath("templates")
-    logging.info(f"Template directory: {template_dir}")
-    logging.info("Starting display app on port 5000...")
-    app.run(host="127.0.0.1", port=5000, debug=True)
+    logging.info(f"Template directory: {TEMPLATE_DIR}")
+    logging.info(f"Starting display app on port {APP_PORT}...")
+    app.run(host=APP_HOST, port=APP_PORT, debug=True)
