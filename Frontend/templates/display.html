@@ -105,10 +105,9 @@
             </div>
             <div class="col text-center">
                 <div class="form-inline justify-content-center">
-                    <select id="networkInterface" class="form-control mr-2">
-                        <option value="Ethernet">Ethernet</option>
-                        <option value="Wi-Fi">Wi-Fi</option>
-                    </select>
+                    <div class="form-group">
+                        <label>Active Interface: <span id="activeInterface">Loading...</span></label>
+                    </div>
                     <div class="btn-group" role="group">
                         <button id="startBtn" class="btn btn-success" onclick="controlSniffing('start')">
                             <i class="fas fa-play"></i> Start
@@ -306,6 +305,25 @@
             });
         }
 
+        // Function to update the active interface display
+        function updateActiveInterface() {
+            $.ajax({
+                url: '/get_interface',
+                method: 'GET',
+                success: function (response) {
+                    if (response.status === 'success') {
+                        $('#activeInterface').text(response.interface);
+                    } else {
+                        $('#activeInterface').text('Error: ' + response.message);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    $('#activeInterface').text('Error getting interface');
+                    console.error('Failed to get interface:', error);
+                }
+            });
+        }
+
         // Initialize with actual backend state
         $(document).ready(function () {
             // Check actual running state from backend
@@ -324,16 +342,11 @@
                 }
             });
 
-            // Set initial interface value from backend
-            $.ajax({
-                url: '/get_interface',
-                method: 'GET',
-                success: function (response) {
-                    if (response.status === 'success') {
-                        $('#networkInterface').val(response.interface);
-                    }
-                }
-            });
+            // Initial interface check
+            updateActiveInterface();
+
+            // Periodically update interface status (every 30 seconds)
+            setInterval(updateActiveInterface, 30000);
         });
     </script>
 </body>

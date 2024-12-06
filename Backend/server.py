@@ -13,7 +13,7 @@ CORS(app)
 
 # Track both the process and current interface
 sniffing_process = None
-current_interface = get_active_interface() # Default value 
+current_interface = get_active_interface()  # Default value
 sniffer_controller = SnifferController()  # Create an instance of SnifferController
 
 
@@ -129,8 +129,11 @@ def clear_data():
 
 @app.route("/get_interface")
 def get_interface():
-    global current_interface
-    return jsonify({"status": "success", "interface": current_interface})
+    try:
+        interface = get_active_interface()  # Use the utility function
+        return jsonify({"status": "success", "interface": interface or "Not detected"})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)})
 
 
 if __name__ == "__main__":

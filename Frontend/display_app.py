@@ -16,6 +16,7 @@ API_ENDPOINTS = {
     "control": "/control",
     "clear": "/clear",
     "status": "/status",
+    "interface": "/get_interface",
 }
 
 # Initialize Flask app
@@ -70,6 +71,16 @@ def get_status():
         response = requests.get(get_api_url("status"))
         return jsonify(response.json())
     except Exception as e:
+        return jsonify({"status": "error", "message": str(e)})
+
+
+@app.route("/get_interface")
+def get_interface():
+    try:
+        response = requests.get(get_api_url("interface"))
+        return jsonify(response.json())
+    except Exception as e:
+        logging.error(f"Error getting interface: {str(e)}")
         return jsonify({"status": "error", "message": str(e)})
 
 

@@ -1,7 +1,6 @@
 services:
   backend:
-    build:
-      context: ./backend
+    image: sha256:13baa7fad6965eec97f3dbbe618c84d49787166c19168274275bf8c641cd678b
     container_name: backend
     ports:
       - "3000:3000"
@@ -9,8 +8,7 @@ services:
       - app-network
 
   frontend:
-    build:
-      context: ./frontend
+    image: sha256:ca72c996ea81739b5e193d78789270c4776cc4305a9e76958434815b905cf217
     container_name: frontend
     ports:
       - "5000:5000"
