@@ -1,11 +1,9 @@
 import sys
-import os
 import ctypes
 from threading import Thread
 import logging
 import time
-import subprocess
-from filter import block_ips, cleanup_rules
+from filter import cleanup_rules
 
 
 def is_admin():
@@ -30,7 +28,7 @@ if __name__ == "__main__":
     sniffer_controller = SnifferController()  # Create an instance of SnifferController
 
     def start_flask():
-        flask_app.run(host="127.0.0.1", port=3000)
+        flask_app.run(host="0.0.0.0", port=3000)
 
     flask_thread = Thread(target=start_flask)
     flask_thread.daemon = True

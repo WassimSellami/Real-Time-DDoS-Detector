@@ -134,7 +134,7 @@ class SnifferController:
 
                         # Identify DDoS IPs that are inbound
                         ddos_ips = output_df.loc[
-                            (output_df["Label"] == "DDoS")
+                            (output_df["Label"] == "BENIGN")
                             & ~output_df["src_ip"].apply(self.is_local_ip),
                             "src_ip",
                         ].unique()

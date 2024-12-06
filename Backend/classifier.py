@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
 import pickle
-from sklearn.preprocessing import MinMaxScaler
 
 
 def filter_and_rename_features(df, list1, list2):

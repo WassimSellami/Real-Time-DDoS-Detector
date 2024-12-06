@@ -12,7 +12,7 @@ CORS(app)
 
 # Track both the process and current interface
 sniffing_process = None
-current_interface = "Ethernet"  # Default value
+current_interface = "eth0"  # Default value
 sniffer_controller = SnifferController()  # Create an instance of SnifferController
 
 
@@ -133,4 +133,4 @@ def get_interface():
 
 
 if __name__ == "__main__":
-    app.run(host="127.0.0.1", port=3000)
+    app.run(host="0.0.0.0", port=3000)

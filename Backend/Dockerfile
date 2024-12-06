@@ -1,0 +1,29 @@
+# Use a more complete Python image that includes build tools
+FROM python:3.9-slim
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    make \
+    net-tools \
+    iproute2 \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# copy the requirements file into the image
+COPY ./requirements.txt /app/requirements.txt
+
+# switch working directory
+WORKDIR /app
+
+# install the dependencies and packages in the requirements file
+RUN pip install --no-cache-dir -r requirements.txt
+
+# copy every content from the local file to the image
+COPY . /app
+
+# configure the container to run in an executed manner
+ENTRYPOINT [ "python" ]
+
+CMD ["main.py"]
