@@ -8,22 +8,19 @@ from sniffer_controller import SnifferController
 import shutil
 from utils import get_active_interface
 
-# Application Constants
 APP_HOST = "0.0.0.0"
 APP_PORT = 3000
 
 app = Flask(__name__)
 CORS(app)
 
-# Track both the process and current interface
 sniffing_process = None
-current_interface = get_active_interface()  # Default value
-sniffer_controller = SnifferController()  # Create an instance of SnifferController
+current_interface = get_active_interface()
+sniffer_controller = SnifferController()
 
 
 @app.route("/status")
 def get_status():
-    # Get actual running state from sniffer_controller
     return jsonify({"status": "success", "sniffing": sniffer_controller.is_running()})
 
 
@@ -32,12 +29,10 @@ def control_sniffing():
     global sniffing_process, current_interface
     data = request.json
     action = data.get("action")
-    # interface = data.get("interface", "Ethernet")
 
     if action == "start":
         if not sniffer_controller.is_running():
             try:
-                # current_interface = interface  # Update the current interface
                 sniffing_process = threading.Thread(
                     target=sniffer_controller.start_sniffing,
                     args=(current_interface,),
@@ -69,23 +64,14 @@ def control_sniffing():
 
 @app.route("/")
 def index():
-    # Get all prediction files
     prediction_files = glob.glob("output/prediction_*.csv")
-
     if not prediction_files:
         return jsonify({"status": "success", "data": []})
 
     try:
-        # Get the most recent file based on creation time
         latest_file = max(prediction_files, key=os.path.getctime)
-
-        # Read only the latest file
         df = pd.read_csv(latest_file)
-
-        # Sort by timestamp (newest first)
         df = df.sort_values("timestamp", ascending=False)
-
-        # Convert to list of dictionaries for JSON response
         traffic_data = df[
             ["src_ip", "src_port", "dst_ip", "dst_port", "Label", "timestamp"]
         ].to_dict("records")
@@ -122,7 +108,6 @@ def get_traffic():
 def clear_data():
     try:
         output_folder = "output"
-        # Remove the entire output folder and recreate it
         if os.path.exists(output_folder):
             shutil.rmtree(output_folder)
         os.makedirs(output_folder)
@@ -134,7 +119,7 @@ def clear_data():
 @app.route("/get_interface")
 def get_interface():
     try:
-        interface = get_active_interface()  # Use the utility function
+        interface = get_active_interface()
         return jsonify({"status": "success", "interface": interface or "Not detected"})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)})

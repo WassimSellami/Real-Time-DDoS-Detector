@@ -4,24 +4,12 @@ import pickle
 
 
 def filter_and_rename_features(df, list1, list2):
-    """Filters and renames features of a DataFrame based on provided lists.
-
-    Args:
-        df: The input DataFrame.
-        list1: List of selected features from df.
-        list2: List of corresponding feature names for renaming.
-
-    Returns:
-        A DataFrame with filtered and renamed features.
-    """
     filtered_df = df[[col for col in df.columns if col in list1]]
     name_mapping = dict(zip(list1, list2))
     renamed_df = filtered_df.rename(columns=name_mapping)
-
     return renamed_df
 
 
-# Load the scaler and model outside of the function to avoid multiple loads
 with open("pickle/scaler.pkl", "rb") as scaler_file:
     loaded_scaler = pickle.load(scaler_file)
 
@@ -45,6 +33,7 @@ list1 = [
     "bwd_seg_size_avg",
     "subflow_fwd_byts",
 ]
+
 list2 = [
     "Total Length of Fwd Packet",
     "Fwd Packet Length Max",
@@ -75,22 +64,12 @@ def classify_input_decision_tree(input_data, trained_model, scaler, selected_fea
 
 
 def classify_input_cnn(df, model, scaler, feature_list):
-    # Scale the features
     scaled_features = scaler.transform(df[feature_list])
-
-    # Reshape the data for CNN input (samples, features, 1)
     reshaped_data = scaled_features.reshape(-1, scaled_features.shape[1], 1)
-
-    # Get predictions
     predictions = model.predict(reshaped_data)
-
-    # Convert predictions to labels
     predictions = (predictions > 0.5).astype(int)
-
-    # Map numeric predictions to string labels
     label_mapping = {0: "BENIGN", 1: "DDoS"}
     string_predictions = np.array(
         [label_mapping[pred] for pred in predictions.flatten()]
     )
-
     return string_predictions

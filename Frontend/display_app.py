@@ -4,12 +4,10 @@ import logging
 import os
 from urllib.parse import urljoin
 
-# Application Constants
 APP_HOST = "0.0.0.0"
 APP_PORT = 5000
 TEMPLATE_DIR = os.path.abspath("templates")
 
-# API Configuration
 API_BASE_URL = os.getenv("API_BASE_URL", "http://backend:3000")
 API_ENDPOINTS = {
     "data": "/",
@@ -19,13 +17,11 @@ API_ENDPOINTS = {
     "interface": "/get_interface",
 }
 
-# Initialize Flask app
 app = Flask(__name__, template_folder=TEMPLATE_DIR)
 logging.basicConfig(level=logging.DEBUG)
 
 
 def get_api_url(endpoint):
-    """Helper function to construct API URLs"""
     return urljoin(API_BASE_URL, API_ENDPOINTS[endpoint])
 
 

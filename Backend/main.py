@@ -15,18 +15,10 @@ def is_admin():
 
 
 if __name__ == "__main__":
-    # if not is_admin():
-    #     # Re-run the program with admin rights
-    #     ctypes.windll.shell32.ShellExecuteW(
-    #         None, "runas", sys.executable, " ".join(sys.argv), None, 1
-    #     )
-    #     sys.exit()
-
-    # Import after admin check to avoid import errors
     from server import app as flask_app
     from sniffer_controller import SnifferController
 
-    sniffer_controller = SnifferController()  # Create an instance of SnifferController
+    sniffer_controller = SnifferController()
 
     def start_flask():
         flask_app.run(host=APP_HOST, port=APP_PORT)
@@ -35,9 +27,6 @@ if __name__ == "__main__":
     flask_thread.daemon = True
     flask_thread.start()
 
-    # Block IPs
-
-    # Keep the server running
     try:
         while True:
             time.sleep(1)

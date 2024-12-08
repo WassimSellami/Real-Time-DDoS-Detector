@@ -2,7 +2,6 @@ from datetime import timedelta
 
 
 class Constants:
-    # Visualization Constants
     GRAPH_HEIGHT = 800
     TITLE_FONT_SIZE = 32
     AXIS_TITLE_FONT_SIZE = 18
@@ -13,32 +12,22 @@ class Constants:
     GRID_WIDTH = 1
     GRID_COLOR = "LightGrey"
     PLOT_BGCOLOR = "white"
-
-    # Layout Positions
     TITLE_Y_POSITION = 0.95
     TITLE_X_POSITION = 0.5
-
-    # Traffic Colors
     NORMAL_TRAFFIC_COLOR = "green"
     NORMAL_TRAFFIC_FILL = "rgba(0, 255, 0, 0.3)"
     ATTACK_TRAFFIC_COLOR = "red"
     ATTACK_TRAFFIC_FILL = "rgba(255, 0, 0, 0.3)"
     LINE_WIDTH = 2
-
-    # Time Settings
     TIME_WINDOW = timedelta(minutes=2)
-    UPDATE_INTERVAL = 5  # seconds
+    UPDATE_INTERVAL = 5
     INTERVAL_FREQ = "5s"
-
-    # Labels
     TITLE_TEXT = "Live DDoS Network Traffic Classification"
     X_AXIS_TITLE = "Time"
     Y_AXIS_TITLE = "Packet Count"
     NORMAL_TRAFFIC_LABEL = "Normal Traffic"
     ATTACK_TRAFFIC_LABEL = "DDoS Traffic"
     BENIGN_LABEL = "BENIGN"
-
-    # File Paths
     INPUT_FOLDER = "input"
     OUTPUT_FOLDER = "output"
     CLASSIFIER_INPUT_FILE = "./input/classifier_input.csv"
