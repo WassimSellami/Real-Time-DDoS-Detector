@@ -8,7 +8,7 @@ APP_HOST = "0.0.0.0"
 APP_PORT = 5000
 TEMPLATE_DIR = os.path.abspath("templates")
 
-API_BASE_URL = os.getenv("API_BASE_URL", "http://backend:3000")
+API_BASE_URL = os.getenv("BACKEND_BASE_URL", "http://backend:3000")
 API_ENDPOINTS = {
     "data": "/",
     "control": "/control",
