@@ -8,6 +8,10 @@ from sniffer_controller import SnifferController
 import shutil
 from utils import get_active_interface
 
+# Application Constants
+APP_HOST = "0.0.0.0"
+APP_PORT = 3000
+
 app = Flask(__name__)
 CORS(app)
 
@@ -137,4 +141,4 @@ def get_interface():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=3000)
+    app.run(host=APP_HOST, port=APP_PORT)

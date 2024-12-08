@@ -8,8 +8,7 @@ services:
       - "3000:3000"
     networks:
       - app-network
-    volumes:
-      - ./Backend:/app
+
     privileged: true
 
   frontend:

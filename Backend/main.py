@@ -4,6 +4,7 @@ from threading import Thread
 import logging
 import time
 from filter import cleanup_rules
+from server import APP_HOST, APP_PORT, app as flask_app
 
 
 def is_admin():
@@ -28,7 +29,7 @@ if __name__ == "__main__":
     sniffer_controller = SnifferController()  # Create an instance of SnifferController
 
     def start_flask():
-        flask_app.run(host="0.0.0.0", port=3000)
+        flask_app.run(host=APP_HOST, port=APP_PORT)
 
     flask_thread = Thread(target=start_flask)
     flask_thread.daemon = True
