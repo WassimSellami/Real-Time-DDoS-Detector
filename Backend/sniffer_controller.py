@@ -131,7 +131,7 @@ class SnifferController:
                         )
 
                         ddos_ips = output_df.loc[
-                            (output_df["Label"] == "BENIGN")
+                            (output_df["Label"] == "DDoS")
                             & ~output_df["src_ip"].apply(
                                 self.network_utils.is_local_ip
                             ),
