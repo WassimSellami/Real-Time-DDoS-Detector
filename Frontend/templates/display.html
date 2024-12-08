@@ -88,6 +88,54 @@
         .status-ddos {
             background-color: #f44336;
         }
+
+        .interface-status {
+            background-color: #f8f9fa;
+            padding: 8px 15px;
+            border-radius: 20px;
+            border: 1px solid #dee2e6;
+            display: inline-flex;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .interface-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-right: 8px;
+        }
+
+        .interface-value {
+            color: #2c3e50;
+            font-weight: 600;
+            font-family: monospace;
+        }
+
+        .interface-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #28a745;
+            margin-left: 10px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7);
+            }
+
+            70% {
+                transform: scale(1);
+                box-shadow: 0 0 0 6px rgba(40, 167, 69, 0);
+            }
+
+            100% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(40, 167, 69, 0);
+            }
+        }
     </style>
 </head>
 
@@ -105,8 +153,10 @@
             </div>
             <div class="col text-center">
                 <div class="form-inline justify-content-center">
-                    <div class="form-group">
-                        <label>Active Interface: <span id="activeInterface">Loading...</span></label>
+                    <div id="interface-container" style="display: none;" class="interface-status mr-3">
+                        <span class="interface-label">Active Interface:</span>
+                        <span id="activeInterface" class="interface-value"></span>
+                        <span class="interface-indicator"></span>
                     </div>
                     <div class="btn-group" role="group">
                         <button id="startBtn" class="btn btn-success" onclick="controlSniffing('start')">
@@ -280,46 +330,70 @@
         }
 
         function controlSniffing(action) {
-            const networkInterface = $('#networkInterface').val();
+            if (action === 'start') {
+                // First check the interface
+                $.ajax({
+                    url: '/get_interface',
+                    method: 'GET',
+                    success: function (response) {
+                        if (response.status === 'success' && response.interface) {
+                            $('#activeInterface').text(response.interface);
+                            $('#interface-container').show();
+                            // Then start sniffing
+                            startSniffing();
+                        } else {
+                            alert('Could not detect network interface. Please try again.');
+                        }
+                    },
+                    error: function () {
+                        alert('Could not detect network interface. Please try again.');
+                    }
+                });
+            } else {
+                // Handle stop action
+                stopSniffing();
+            }
+        }
 
+        function startSniffing() {
             $.ajax({
                 url: '/control',
                 method: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify({
-                    action: action,
-                    interface: networkInterface
+                    action: 'start'
                 }),
                 success: function (response) {
                     if (response.status === 'success') {
-                        updateButtonStates(action);
-                        // Disable interface selection while running
-                        $('#networkInterface').prop('disabled', action === 'start');
+                        updateButtonStates('start');
                     } else {
                         alert(response.message);
                     }
                 },
                 error: function (xhr, status, error) {
-                    alert('Failed to control sniffing: ' + error);
+                    alert('Failed to start sniffing: ' + error);
                 }
             });
         }
 
-        // Function to update the active interface display
-        function updateActiveInterface() {
+        function stopSniffing() {
             $.ajax({
-                url: '/get_interface',
-                method: 'GET',
+                url: '/control',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    action: 'stop'
+                }),
                 success: function (response) {
                     if (response.status === 'success') {
-                        $('#activeInterface').text(response.interface);
+                        updateButtonStates('stop');
+                        $('#interface-container').hide();
                     } else {
-                        $('#activeInterface').text('Error: ' + response.message);
+                        alert(response.message);
                     }
                 },
                 error: function (xhr, status, error) {
-                    $('#activeInterface').text('Error getting interface');
-                    console.error('Failed to get interface:', error);
+                    alert('Failed to stop sniffing: ' + error);
                 }
             });
         }
@@ -333,20 +407,26 @@
                 success: function (response) {
                     if (response.status === 'success') {
                         updateButtonStates(response.sniffing ? 'start' : 'stop');
+                        // Only check interface if already running
+                        if (response.sniffing) {
+                            $.ajax({
+                                url: '/get_interface',
+                                method: 'GET',
+                                success: function (interfaceResponse) {
+                                    if (interfaceResponse.status === 'success') {
+                                        $('#activeInterface').text(interfaceResponse.interface).show();
+                                    }
+                                }
+                            });
+                        }
                     } else {
-                        updateButtonStates('stop');  // Default to stopped if error
+                        updateButtonStates('stop');
                     }
                 },
                 error: function () {
-                    updateButtonStates('stop');  // Default to stopped if error
+                    updateButtonStates('stop');
                 }
             });
-
-            // Initial interface check
-            updateActiveInterface();
-
-            // Periodically update interface status (every 30 seconds)
-            setInterval(updateActiveInterface, 30000);
         });
     </script>
 </body>

@@ -1,14 +1,21 @@
 services:
   backend:
-    image: sha256:13baa7fad6965eec97f3dbbe618c84d49787166c19168274275bf8c641cd678b
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
     container_name: backend
     ports:
       - "3000:3000"
     networks:
       - app-network
+    volumes:
+      - ./Backend:/app
+    privileged: true # Required for network interface access
 
   frontend:
-    image: sha256:ca72c996ea81739b5e193d78789270c4776cc4305a9e76958434815b905cf217
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
     container_name: frontend
     ports:
       - "5000:5000"
