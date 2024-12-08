@@ -10,7 +10,7 @@ services:
       - app-network
     volumes:
       - ./Backend:/app
-    privileged: true # Required for network interface access
+    privileged: true
 
   frontend:
     build:
