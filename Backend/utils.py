@@ -4,15 +4,12 @@ import ipaddress
 
 
 def get_active_interface():
-    interfaces = psutil.net_if_addrs()  # Get all network interfaces
+    interfaces = psutil.net_if_addrs()
     for interface, addresses in interfaces.items():
         for addr in addresses:
-            # Use socket.AF_INET to check for IPv4 addresses
-            if addr.family == socket.AF_INET and addr.address != "127.0.0.1":  # Exclude localhost
+            if addr.family == socket.AF_INET and addr.address != "127.0.0.1":
                 return interface
-    return None  # Return None if no active interface is found
-
-
+    return None
 
 
 class NetworkUtils:

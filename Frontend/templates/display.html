@@ -3,9 +3,7 @@
 
 <head>
     <title>Traffic Data Display</title>
-    <!-- Include Dash dependencies -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css">
-    <!-- Add jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
         body {
@@ -193,17 +191,14 @@
                     </tr>
                 </thead>
                 <tbody id="traffic-data">
-                    <!-- Data will be dynamically inserted here -->
                 </tbody>
             </table>
         </div>
     </div>
 
-    <!-- Add Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
     <script>
-        // Store all traffic data
         let allTrafficData = [];
 
         function updateRecordCount() {
@@ -216,23 +211,17 @@
                 method: 'POST',
                 success: function (response) {
                     if (response.status === 'success') {
-                        // Stop any pending updates
                         clearInterval(updateInterval);
 
-                        // Clear frontend data array
-                        allTrafficData = [];  // Create a new empty array instead of just clearing length
+                        allTrafficData = [];
 
-                        // Clear the table display
                         const tbody = $('#traffic-data');
                         tbody.empty();
 
-                        // Update the record count to show 0
                         updateRecordCount();
 
-                        // Hide any errors if they were showing
                         $('#error-container').hide();
 
-                        // Restart updates after a brief pause
                         setTimeout(() => {
                             updateInterval = setInterval(updateTable, 5000);
                         }, 1000);
@@ -246,14 +235,11 @@
             });
         }
 
-        // Store interval ID for updates
         let updateInterval = null;
 
         function mergeNewData(newData) {
-            // Create a map of existing timestamps for quick lookup
             const existingTimestamps = new Set(allTrafficData.map(item => item.timestamp));
 
-            // Add only new records
             newData.forEach(item => {
                 if (!existingTimestamps.has(item.timestamp)) {
                     allTrafficData.push(item);
@@ -272,13 +258,11 @@
                 method: 'GET',
                 success: function (response) {
                     if (response.status === 'success') {
-                        // Merge new data with existing data
                         mergeNewData(response.data);
 
                         const tbody = $('#traffic-data');
-                        tbody.empty(); // Clear existing rows
+                        tbody.empty();
 
-                        // Display all accumulated data
                         allTrafficData.forEach(function (item) {
                             const row = `
                                 <tr class="${item.Label === 'BENIGN' ? 'benign-traffic' : 'ddos-traffic'}">
@@ -302,7 +286,6 @@
                     }
                 },
                 error: function (xhr, status, error) {
-                    // Just hide any existing errors and show empty table
                     $('#error-container').hide();
                     $('#traffic-data').empty();
                     updateRecordCount();
@@ -319,9 +302,8 @@
             statusText.textContent = isRunning ? 'Running' : 'Stopped';
             statusText.className = `badge badge-${isRunning ? 'success' : 'secondary'}`;
 
-            // Manage data updates
             if (isRunning) {
-                updateTable(); // Get initial data
+                updateTable();
                 updateInterval = setInterval(updateTable, 5000);
             } else {
                 clearInterval(updateInterval);
@@ -331,7 +313,6 @@
 
         function controlSniffing(action) {
             if (action === 'start') {
-                // First check the interface
                 $.ajax({
                     url: '/get_interface',
                     method: 'GET',
@@ -339,7 +320,6 @@
                         if (response.status === 'success' && response.interface) {
                             $('#activeInterface').text(response.interface);
                             $('#interface-container').show();
-                            // Then start sniffing
                             startSniffing();
                         } else {
                             alert('Could not detect network interface. Please try again.');
@@ -350,7 +330,6 @@
                     }
                 });
             } else {
-                // Handle stop action
                 stopSniffing();
             }
         }
@@ -398,16 +377,13 @@
             });
         }
 
-        // Initialize with actual backend state
         $(document).ready(function () {
-            // Check actual running state from backend
             $.ajax({
                 url: '/status',
                 method: 'GET',
                 success: function (response) {
                     if (response.status === 'success') {
                         updateButtonStates(response.sniffing ? 'start' : 'stop');
-                        // Only check interface if already running
                         if (response.sniffing) {
                             $.ajax({
                                 url: '/get_interface',

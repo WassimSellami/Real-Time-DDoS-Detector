@@ -16,7 +16,7 @@ import logging
 from constants import Constants
 import shutil
 import ipaddress
-import psutil  # Add this import to use psutil for network information
+import psutil
 
 SNIFTER_DURATION = 5
 
@@ -26,7 +26,7 @@ class SnifferController:
         self.running = False
         self.current_sniffer = None
         self.network_utils = NetworkUtils()
-   
+
     def get_timestamped_filename(self, base_path, prefix, extension):
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         return os.path.join(base_path, f"{prefix}_{timestamp}{extension}")
@@ -42,7 +42,7 @@ class SnifferController:
 
     def get_local_subnet_mask(self):
         """Retrieve the subnet mask of the local network interface."""
-        for interface, addrs in psutil.net_if_addrs().items():
+        for addrs in psutil.net_if_addrs().items():
             for addr in addrs:
                 if addr.family == socket.AF_INET:
                     return addr.netmask
@@ -69,7 +69,6 @@ class SnifferController:
 
         classifier_input_file = "./input/classifier_input.csv"
 
-        # Ensure the input directory exists
         if not os.path.exists(input_folder):
             os.makedirs(input_folder)
 
@@ -79,10 +78,9 @@ class SnifferController:
         with open("pickle/ddos_decision_tree_model.pkl", "rb") as model_file:
             loaded_model = pickle.load(model_file)
 
-        blocked_ips = set()  # Set to store blocked IPs
-        blocked_ips_file = "blocked_ips.txt"  # File to store blocked IPs
+        blocked_ips = set()
+        blocked_ips_file = "blocked_ips.txt"
 
-        # Load previously blocked IPs from file
         if os.path.exists(blocked_ips_file):
             with open(blocked_ips_file, "r") as f:
                 blocked_ips.update(f.read().splitlines())
@@ -132,10 +130,11 @@ class SnifferController:
                             "%Y-%m-%d %H:%M:%S"
                         )
 
-                        # Identify DDoS IPs that are inbound
                         ddos_ips = output_df.loc[
                             (output_df["Label"] == "BENIGN")
-                            & ~output_df["src_ip"].apply(self.network_utils.is_local_ip),
+                            & ~output_df["src_ip"].apply(
+                                self.network_utils.is_local_ip
+                            ),
                             "src_ip",
                         ].unique()
 
@@ -148,10 +147,8 @@ class SnifferController:
                             block_ips(new_ddos_ips)
                             logging.info(f"Blocked new IPs: {new_ddos_ips}")
 
-                            # Update the blocked_ips set
                             blocked_ips.update(new_ddos_ips)
 
-                            # Save the updated blocked IPs to file
                             with open(blocked_ips_file, "w") as f:
                                 for ip in blocked_ips:
                                     f.write(f"{ip}\n")
@@ -187,7 +184,6 @@ class SnifferController:
         finally:
             if self.current_sniffer is not None and self.current_sniffer.running:
                 self.current_sniffer.stop()
-            # Clean up firewall rules
             from filter import cleanup_rules
 
             cleanup_rules()
