@@ -1,22 +1,18 @@
 FROM python:3.9-slim
 
 RUN apt-get update && apt-get install -y \
-    gcc \
-    g++ \
-    make \
+    iputils-ping \
     net-tools \
-    iproute2 \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-
-COPY ./requirements.txt /app/requirements.txt
+    && rm -rf /var/lib/apt/lists/* \
+    && rm -rf /var/cache/apt/*
 
 WORKDIR /app
 
-RUN pip install --no-cache-dir -r requirements.txt
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt \
+    && rm -rf /root/.cache/pip/*
 
-COPY . /app
+COPY . .
 
-ENTRYPOINT [ "python" ]
-
-CMD ["main.py"]
+CMD ["python", "main.py"]
