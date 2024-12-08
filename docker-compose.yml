@@ -9,6 +9,10 @@ services:
     networks:
       - app-network
     privileged: true
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    network_mode: "host"
 
   frontend:
     build:
